@@ -1,218 +1,92 @@
 ;(function () {
     var Page = function () {
-        this.defaults = {
-            totalPages: 9,//总页数
-            liNums: 9,//分页的数字按钮数(建议取奇数)
-            activeClass: 'active' ,//active类
-            hasFirstPage: true,//是否有首页按钮
-            hasLastPage: true,//是否有末页按钮
-            hasPrv: true,//是否有前一页按钮
-            hasNext: true,//是否有后一页按钮
-            callBack : function(page){
-                //回调，page选中页数
-            }
-        };
+        // this.defaults = {
+        //     totalPages: 9,//总页数
+        //     liNums: 9,//分页的数字按钮数(建议取奇数)
+        //     activeClass: 'active',//active类
+        //     hasFirstPage: true,//是否有首页按钮
+        //     hasLastPage: true,//是否有末页按钮
+        //     hasPrv: true,//是否有前一页按钮
+        //     hasNext: true,//是否有后一页按钮
+        //     callBack: function (page) {
+        //         //回调，page选中页数
+        //     }
+        // };
     };
     Page.prototype = {
-      create:function (cfg) {
-          var CFG = $.extend(this.defaults,cfg);
-          var wrap = $('<div id="pageWrap"></div>'),
-              firstPage= $('<div id="firstPage">首页</div>'),
-              prvPage =$('<div id="lastPage">«上一页</div>'),
-              lastPage=$('<div id="lastPage">末页</div>'),
-              liPage = $('<ul><li>18</li></ul>'),
-              nextPage = $('<div id="nextPage">下一页»</div>'),
-              body = $('body');
-          wrap.append(firstPage);
-          wrap.append(prvPage);
-          wrap.append(liPage);
-          wrap.append(nextPage);
-          wrap.append(lastPage);
-          body.append(wrap);
+        init: function () {
+            // var CFG = $.extend(this.defaults, cfg);
+            var  currentPage = 4;
+            var  totalPage = 20;
+            var paginationStr =this.getPage(currentPage, totalPage);
+            $('.pagination-container').append(paginationStr);
+            return this;
+            this.bindEvent();
+        },
+        getPage: function (currentPage, totalPage) {
+            //显示：第一页，当前页，当前页的前后两页，最后一页
+            //以当前页为分割点，分别得到当前页前面的页码和后面的页码
+            var pageStr = '<a class="active">' + currentPage + '</a>';
+            // 将当前页前后2页的页码展示出来
+            for (var i = 1; i <= 2; i++) {
+                //得到当前页前两页的的页码
+                //其中的1指第一页
+                if (currentPage > i + 1) {
+                    pageStr = '<a>' + (currentPage - i) + '</a>' + pageStr;
+                }
+                //得到当前页后两页的页码
+                if (currentPage + i < totalPage) {
+                    pageStr = pageStr + '<a>' + (currentPage + i) + '</a>';
+                }
+            }
+            //得到当前页前面用...表示的页码
+            //两个1分别表示第一页，和当前页
+            if (currentPage > 2 + 1 + 1) {
+                pageStr = ' ... ' + pageStr;
+            }
 
-      }
-        
-    }
+//        //得到上一页
+            if (currentPage > 1) {
+                pageStr = '<a class="prePage">上一页</a><a>1</a>' + pageStr;
+            }
 
-window.Page = new Page;
+//        //得到当前页后面用...表示的页码
+//        //其中1表示最后一页，当前页已经在前面计算过，这里不再计算
+            if (currentPage + 2 + 1 < totalPage) {
+                pageStr = pageStr + ' ... ';
+            }
 
-  // //插件名称
-    // $.fn.Page = function (options) {
-    //   //覆盖默认参数
-    //   var opts = $.extend(defaults, options);
-    //   //主函数
-    //   return this.each(function () {
-    //     var obj = $(this);
-    //     var l = opts.totalPages;
-    //     var n = opts.liNums;
-    //     var active = opts.activeClass;
-    //     var str = '';
-    //     var str1 = '<li><a href="javascript:" class="'+ active +'">1</a></li>';
-    //     if (l > 1&&l < n+1) {
-    //       for (i = 2; i < l + 1; i++) {
-    //         str += '<li><a href="javascript:">' + i + '</a></li>';
-    //       }
-    //     }else if(l > n){
-    //       for (i = 2; i < n + 1; i++) {
-    //         str += '<li><a href="javascript:">' + i + '</a></li>';
-    //       }
-    //     }
-    //     var dataHtml = '';
-    //     if(opts.hasNext){
-    //         dataHtml += '<div class="next fr">' + opts.next + '</div>';
-    //     }
-    //     if(opts.hasLastPage){
-    //         dataHtml += '<div class="last fr">' + opts.lastPage + '</div>';
-    //     }
-    //         dataHtml += '<ul class="pagingUl">' + str1 + str + '</ul>';
-    //     if(opts.hasFirstPage){
-    //         dataHtml += '<div class="first fr">' + opts.firstPage + '</div>';
-    //     }
-    //     if(opts.hasPrv){
-    //         dataHtml += '<div class="prv fr">' + opts.prv + '</div>';
-    //     }
-    //
-    //     obj.html(dataHtml).off("click");//防止插件重复调用时，重复绑定事件
-    //
-    //     obj.on('click', '.next', function () {
-    //       var pageshow = parseInt($('.' + active).html());
-    //       var nums,flag;
-    //       var a = n % 2;
-    //       if(a == 0){
-    //         //偶数
-    //         nums = n;
-    //         flag = true;
-    //       }else if(a == 1){
-    //         //奇数
-    //         nums = (n+1);
-    //         flag = false;
-    //       }
-    //       if(pageshow >= l) {
-    //         return;
-    //       }else if(pageshow > 0&&pageshow <= nums/2){
-    //         //最前几项
-    //         $('.' + active).removeClass(active).parent().next().find('a').addClass(active);
-    //       }else if((pageshow > l-nums/2&&pageshow < l&&flag==false)||(pageshow > l-nums/2-1&&pageshow < l&&flag==true)){
-    //         //最后几项
-    //         $('.' + active).removeClass(active).parent().next().find('a').addClass(active);
-    //       }else{
-    //         $('.' + active).removeClass(active).parent().next().find('a').addClass(active);
-    //         fpageShow(pageshow+1);
-    //       }
-    //       opts.callBack(pageshow+1);
-    //     });
-    //     obj.on('click', '.prv', function () {
-    //       var pageshow = parseInt($('.' + active).html());
-    //       var nums = odevity(n);
-    //       if (pageshow <= 1) {
-    //           return;
-    //       }else if((pageshow > 1&&pageshow <= nums/2)||(pageshow > l-nums/2&&pageshow < l+1)){
-    //         //最前几项或最后几项
-    //         $('.' + active).removeClass(active).parent().prev().find('a').addClass(active);
-    //       }else {
-    //         $('.' + active).removeClass(active).parent().prev().find('a').addClass(active);
-    //         fpageShow(pageshow-1);
-    //       }
-    //       opts.callBack(pageshow-1);
-    //     });
-    //
-    //     obj.on('click', '.first', function(){
-    //       var activepage = parseInt($('.' + active).html());
-    //       if (activepage <= 1){
-    //         return
-    //       }//当前第一页
-    //       opts.callBack(1);
-    //       fpagePrv(0);
-    //     });
-    //     obj.on('click', '.last', function(){
-    //       var activepage = parseInt($('.' + active).html());
-    //       if (activepage >= l){
-    //         return;
-    //       }//当前最后一页
-    //       opts.callBack(l);
-    //       if(l>n){
-    //         fpageNext(n-1);
-    //       }else{
-    //         fpageNext(l-1);
-    //       }
-    //     });
-    //
-    //     obj.on('click', 'li', function(){
-    //       var $this = $(this);
-    //       var pageshow = parseInt($this.find('a').html());
-    //       var nums = odevity(n);
-    //       opts.callBack(pageshow);
-    //       if(l>n){
-    //         if(pageshow > l-nums/2&&pageshow < l+1){
-    //           //最后几项
-    //           fpageNext((n-1)-(l-pageshow));
-    //         }else if(pageshow > 0&&pageshow < nums/2){
-    //           //最前几项
-    //           fpagePrv(pageshow-1);
-    //         }else{
-    //           fpageShow(pageshow);
-    //         }
-    //       }else{
-    //         $('.' + active).removeClass(active);
-    //         $this.find('a').addClass(active);
-    //       }
-    //     });
-    //
-    //         //重新渲染结构
-    //       /*activePage 当前项*/
-    //       function fpageShow(activePage){
-    //         var nums = odevity(n);
-    //         var pageStart = activePage - (nums/2-1);
-    //         var str1 = '';
-    //         for(i=0;i<n;i++){
-    //           str1 += '<li><a href="javascript:" class="">' + (pageStart+i) + '</a></li>'
-    //         }
-    //         obj.find('ul').html(str1);
-    //         obj.find('ul li').eq(nums/2-1).find('a').addClass(active);
-    //       }
-    //       /*index 选中项索引*/
-    //       function fpagePrv(index){
-    //         var str1 = '';
-    //         if(l>n-1){
-    //           for(i=0;i<n;i++){
-    //             str1 += '<li><a href="javascript:" class="">' + (i+1) + '</a></li>'
-    //           }
-    //         }else{
-    //           for(i=0;i<l;i++){
-    //             str1 += '<li><a href="javascript:" class="">' + (i+1) + '</a></li>'
-    //           }
-    //         }
-    //         obj.find('ul').html(str1);
-    //         obj.find('ul li').eq(index).find('a').addClass(active);
-    //       }
-    //       /*index 选中项索引*/
-    //       function fpageNext(index){
-    //         var str1 = '';
-    //         if(l>n-1){
-    //           for(i=l-(n-1);i<l+1;i++){
-    //             str1 += '<li><a href="javascript:" class="">' + i + '</a></li>'
-    //           }
-    //          obj.find('ul').html(str1);
-    //          obj.find('ul li').eq(index).find('a').addClass(active);
-    //         }else{
-    //           for(i=0;i<l;i++){
-    //             str1 += '<li><a href="javascript:" class="">' + (i+1) + '</a></li>'
-    //           }
-    //          obj.find('ul').html(str1);
-    //          obj.find('ul li').eq(index).find('a').addClass(active);
-    //         }
-    //       }
-    //       //判断liNums的奇偶性
-    //       function odevity(n){
-    //         var a = n % 2;
-    //         if(a == 0){
-    //           //偶数
-    //           return n;
-    //         }else if(a == 1){
-    //           //奇数
-    //           return (n+1);
-    //         }
-    //       }
-    //   });
-  // }
+//        //得到下一页
+            if (currentPage < totalPage) {
+                pageStr = pageStr + '<a>' + totalPage + '</a><a class="lastPage">下一页</a>';
+            }
+
+            return pageStr;
+        },
+        bindEvent: function () {
+            var that = this;
+            $(document).off('click', '.pagination-container a').on('click', '.pagination-container a', function() {
+                var $this = $(this);
+                var pageNum;
+                var currentPage = $('.pagination-container a.active').text();
+
+                if( $this.hasClass('prePage') ) {
+                    //点击【上一页】
+                    pageNum = currentPage - 1;
+                } else if( $this.hasClass('lastPage') ) {
+                    //点击【下一页】
+                    pageNum = currentPage + 1;
+                } else {
+                    pageNum = $this.text();
+                }
+                var pageHtml = that.getPage(pageNum, totalPage);
+                $('.pagination-container').html(pageHtml);
+            });
+        }
+
+    };
+
+    window.pager = new Page;
+
+
 })();
